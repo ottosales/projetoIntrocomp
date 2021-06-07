@@ -5,12 +5,26 @@ import utils
 def loadWindow():
     return utils.loadJSON('../assets/data/window.json')
 
-#todo: add color and square size to this function
+def write(model, string, color, yPos, size):
+    # todo: move this next line of code to the utils lib
+    # possibly, creating a function where we can send the size of the text we want and receive a dict
+    # so we can use it like: size40Text['robotoMedium'] or size25Text['joystix']
+    text = pg.font.Font('../assets/fonts/RobotoMono-Medium.ttf', size)
+    textSurf, textRect = text_objects(string, text, color)
+    textRect.center = ((model['windowObject'].returnWindowSize()[0]/2), (yPos))
+
+    model['pgWindow'].blit(textSurf, textRect)
+
+def text_objects(text, font, color):
+    textSurface = font.render(text, True, color)
+    return textSurface, textSurface.get_rect()
+
+# todo: add color and square size to this function
 def drawSquare(pgWindow, pos, margin):
-    outerRect = pg.Rect(pos[0], pos[1], 180, 180)
-    innerRect = pg.Rect(pos[0] + margin, pos[1] + margin, 180 - (2 * margin), 180 - (2 * margin))
-    pg.draw.rect(pgWindow, (255, 255, 255), outerRect)
-    pg.draw.rect(pgWindow, (0, 0, 0), innerRect)
+    outerRect = pg.Rect(pos[0], pos[1], 180, 180) # square size goes here
+    innerRect = pg.Rect(pos[0] + margin, pos[1] + margin, 180 - (2 * margin), 180 - (2 * margin)) # square size goes here
+    pg.draw.rect(pgWindow, (255, 255, 255), outerRect) # color goes here
+    pg.draw.rect(pgWindow, (0, 0, 0), innerRect) # color goes here
 
 def setup():
     windowSettings = loadWindow()
@@ -37,7 +51,7 @@ def setup():
 def charSelectionLoop(model):
     run = True
     selectedSquare = 0
-    #todo: make this a JSON file
+    # todo: make this a JSON file
     allCharacterSquares = [(132, 200) , (422, 200), (712, 200), (132, 490) , (422, 490), (712, 490)]
 
     while run:
@@ -60,11 +74,12 @@ def charSelectionLoop(model):
                 
         
         model['pgWindow'].fill(model['windowObject'].returnColor())
+        write(model, 'The IntroBattle Project', (255, 255, 255), 80, 45)
 
         for i in range(0, len(allCharacterSquares)):
             if i == selectedSquare:
                 drawSquare(model['pgWindow'], allCharacterSquares[i], 9)
             else:
-                drawSquare(model['pgWindow'], allCharacterSquares[i], 4)
+                drawSquare(model['pgWindow'], allCharacterSquares[i], 5)
         
         pg.display.update()
