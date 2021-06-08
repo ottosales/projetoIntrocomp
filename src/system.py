@@ -3,13 +3,13 @@ import window
 import utils
 
 def loadWindow():
-    return utils.loadJSON('../assets/data/window.json')
+    return utils.loadJSON('assets/data/window.json')
 
 def write(model, string, color, yPos, size):
     # todo: move this next line of code to the utils lib
     # possibly, creating a function where we can send the size of the text we want and receive a dict
     # so we can use it like: size40Text['robotoMedium'] or size25Text['joystix']
-    text = pg.font.Font('../assets/fonts/RobotoMono-Medium.ttf', size)
+    text = pg.font.Font('assets/fonts/RobotoMono-Medium.ttf', size)
     textSurf, textRect = text_objects(string, text, color)
     textRect.center = ((model['windowObject'].returnWindowSize()[0]/2), (yPos))
 
