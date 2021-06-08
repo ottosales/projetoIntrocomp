@@ -2,6 +2,9 @@ import pygame as pg
 import window
 import utils
 
+def loadImage(path, size):
+    return pg.transform.scale(pg.image.load(path), size)
+
 def loadWindow():
     return utils.loadJSON('assets/data/window.json')
 
@@ -26,27 +29,31 @@ def drawSquare(pgWindow, pos, margin):
     pg.draw.rect(pgWindow, (255, 255, 255), outerRect) # color goes here
     pg.draw.rect(pgWindow, (0, 0, 0), innerRect) # color goes here
 
+def drawCharacter(pgWindow, charImage, pos):
+    pgWindow.blit(charImage, pos)
+
 def setup():
     windowSettings = loadWindow()
     print(windowSettings)
     windowObject = window.Window(windowSettings['width'], windowSettings['height'])
+    pepe = loadImage('assets/sprites/sadPepe.png', (128, 128))
 
     pg.init()
     pgWindow = pg.display.set_mode(windowObject.returnWindowSize())
     pg.display.set_caption('The IntroBattle Project')
     pg.key.set_repeat(100)
     clock = pg.time.Clock()
-    pg.key.set_repeat(100)
+    pg.key.set_repeat(200)
 
     model = {
         'windowSettings': windowSettings,
         'windowObject': windowObject,
         'pgWindow': pgWindow,
-        'clock': clock
+        'clock': clock,
+        'pepe': pepe
     }
 
     return model
-
 
 def charSelectionLoop(model):
     run = True
@@ -71,8 +78,7 @@ def charSelectionLoop(model):
                     selectedSquare += 1
                 elif event.key == pg.K_LEFT and (selectedSquare != 0 and selectedSquare != 3):
                     selectedSquare -= 1
-                
-        
+
         model['pgWindow'].fill(model['windowObject'].returnColor())
         write(model, 'The IntroBattle Project', (255, 255, 255), 80, 45)
 
@@ -81,5 +87,7 @@ def charSelectionLoop(model):
                 drawSquare(model['pgWindow'], allCharacterSquares[i], 9)
             else:
                 drawSquare(model['pgWindow'], allCharacterSquares[i], 5)
-        
+
+            drawCharacter(model['pgWindow'], model['pepe'], (allCharacterSquares[i][0] + 30, allCharacterSquares[i][1] + 30)) # magic numbers for now
+
         pg.display.update()
