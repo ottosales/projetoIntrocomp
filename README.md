@@ -1,11 +1,10 @@
 # 2021 Introcomp Project
 
-Pygame installation: `python3 -m pip install pygame==2.0.0`
+Pygame installation: `make install` or `python3 -m pip install pygame==2.0.0`
 
 How to run the project:
-
- - from the root folder: `cd src/ && python3 main.py`
- - from the src folder: `python3 main.py`
+ - `make up`
+ - `python3 main.py` in the src/ folder
 
 ## File Organization
 ### assets/
@@ -17,3 +16,7 @@ The assets folder have three sub folders:
 
 ### src/
 The src folder holds all the `.py` files. Sub folders are not yet available
+
+
+#### Extras
+You can clean the cache if something there is troubling you by running `make clean` :)
