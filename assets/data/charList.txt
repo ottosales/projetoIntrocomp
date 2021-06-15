@@ -1,0 +1,6 @@
+knight
+rogue
+wizard
+hunter
+priest
+swashbuckler

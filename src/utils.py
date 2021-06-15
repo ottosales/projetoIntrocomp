@@ -10,3 +10,11 @@ def loadJSON(path):
 
 def printData(data):
     print(data)
+
+def loadTxt(path):
+    data = []
+    with open(path) as openfileobject:
+        for line in openfileobject:
+            data.append(line.rstrip('\n'))
+    openfileobject.close()
+    return data

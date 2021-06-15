@@ -1,17 +1,34 @@
 import pygame as pg
 import window
 import utils
+import player
+class Teams:
+    pcs = None
+    enemies = None
 
+    def __init__(self):
+        pcs = []
+        enemies = []
+ 
 def loadWindow():
     return utils.loadJSON('assets/data/window.json')
 
-def write(model, string, color, yPos, size):
+def loadCharList():
+    return utils.loadTxt('assets/data/charList.txt')
+
+def loadCharacter(character):
+    return utils.loadJSON('assets/data/' + character + '.json')
+
+def write(model, string, color, xPos, yPos, size):
     # todo: move this next line of code to the utils lib
     # possibly, creating a function where we can send the size of the text we want and receive a dict
     # so we can use it like: size40Text['robotoMedium'] or size25Text['joystix']
     text = pg.font.Font('assets/fonts/RobotoMono-Medium.ttf', size)
     textSurf, textRect = text_objects(string, text, color)
-    textRect.center = ((model['windowObject'].returnWindowSize()[0]/2), (yPos))
+    if not xPos:
+        textRect.center = ((model['windowObject'].returnWindowSize()[0]/2), (yPos))
+    else:
+        textRect.center = (xPos, yPos)
 
     model['pgWindow'].blit(textSurf, textRect)
 
@@ -47,12 +64,13 @@ def setup():
 
     return model
 
+charList = loadCharList()
 
 def charSelectionLoop(model):
     run = True
     selectedSquare = 0
     # todo: make this a JSON file
-    allCharacterSquares = [(132, 200) , (422, 200), (712, 200), (132, 490) , (422, 490), (712, 490)]
+    allCharacterSquares = [(132, 200), (422, 200), (712, 200), (132, 490), (422, 490), (712, 490)]
 
     while run:
         model['clock'].tick(60)
@@ -60,7 +78,7 @@ def charSelectionLoop(model):
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 run = False
-            elif event.type == pg.KEYDOWN:
+            elif event.type == pg.KEYUP:
                 if event.key == pg.K_ESCAPE:
                     run = False
                 elif event.key == pg.K_UP and selectedSquare > 2:
@@ -71,15 +89,18 @@ def charSelectionLoop(model):
                     selectedSquare += 1
                 elif event.key == pg.K_LEFT and (selectedSquare != 0 and selectedSquare != 3):
                     selectedSquare -= 1
+                elif event.key == pg.K_RETURN:
+                    pass
                 
-        
         model['pgWindow'].fill(model['windowObject'].returnColor())
-        write(model, 'The IntroBattle Project', (255, 255, 255), 80, 45)
+        write(model, 'The IntroBattle Project', (255, 255, 255), None, 80, 45)
 
         for i in range(0, len(allCharacterSquares)):
             if i == selectedSquare:
                 drawSquare(model['pgWindow'], allCharacterSquares[i], 9)
+                write(model, charList[i].capitalize(), (255, 255, 255), allCharacterSquares[i][0] + 90, allCharacterSquares[i][1] + 210, 38)
             else:
                 drawSquare(model['pgWindow'], allCharacterSquares[i], 5)
+                write(model, charList[i].capitalize(), (255, 255, 255), allCharacterSquares[i][0] + 90, allCharacterSquares[i][1] + 210, 35)
         
         pg.display.update()

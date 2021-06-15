@@ -1,0 +1,11 @@
+{
+    "_name": "knight",
+    "displayName": "Knight",
+    "attack": 60,
+    "defense": 100,
+    "maxHP": 200,
+    "speed": 30,
+    "imageSrc": "../images/redSadPepe.png",
+    "resistances": 0,
+    "color": "#B5B7BB"
+}
