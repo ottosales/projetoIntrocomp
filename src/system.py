@@ -154,6 +154,7 @@ def showCharacterStats(model, characterList):
         writeLeftAlign(model, hpStr , (255, 255, 255), 780 , y, 30)
         y += 70
 
+# please god forgive me for these warcrimes
 def showCurrCharacterMoves(model, characterList):
     drawRectangle(model['pgWindow'], (23, 533), 3, 600 - (23 + 5), 211)
     writeLeftAlign(model, 'Paladin\'s turn!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10), 30)
