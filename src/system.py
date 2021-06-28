@@ -2,6 +2,7 @@ import pygame as pg
 import window
 import utils
 import player
+import itertools
 class Teams:
     pcs = None
     enemies = None
@@ -117,7 +118,7 @@ def charSelectionLoop(model):
                     characterJsonList.append(loadCharacter(charList[selectedSquare]))
                 
         model['pgWindow'].fill(model['windowObject'].returnColor())
-        write(model, 'The IntroBattle Project', (255, 255, 255), None, 80, 45)
+        write(model, 'IntroBattle!', (255, 255, 255), None, 80, 45)
 
         for i in range(0, len(allCharacterSquares)):
             if i == selectedSquare:
@@ -155,20 +156,38 @@ def showCharacterStats(model, characterList):
         y += 70
 
 # please god forgive me for these warcrimes
-def showCurrCharacterMoves(model, characterList):
+def showCurrCharacterMoves(model, currentCharacter, selectionTrianglePos):
     drawRectangle(model['pgWindow'], (23, 533), 3, 600 - (23 + 5), 211)
-    writeLeftAlign(model, 'Paladin\'s turn!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10), 30)
+    writeLeftAlign(model, currentCharacter.getName() + '\'s turn!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10), 30)
     writeLeftAlign(model, 'Attack', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70), 30)
     writeLeftAlign(model, 'Insight', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70 + 60), 30)
     writeLeftAlign(model, 'Defend', (255, 255, 255), (23 + 3 + 5+ 10 + 40 + 300) , (533 + 3 + 5 + 10 + 70), 30)
     writeLeftAlign(model, 'Skills', (255, 255, 255), (23 + 3 + 5+ 10 + 40 + 300) , (533 + 3 + 5 + 10 + 70 + 60), 30)
-    pg.draw.polygon(model['pgWindow'], (255, 255, 255), [((23 + 3 + 5+ 10 + 40 + 300 - 10) , (533 + 3 + 5 + 10 + 70 + 60 + 20)), ((23 + 3 + 5+ 10 + 40 + 300 - 20) , (533 + 3 + 5 + 10 + 70 + 60 + 10)), ((23 + 3 + 5+ 10 + 40 + 300 - 20) , (533 + 3 + 5 + 10 + 70 + 60 + 30))])
+    #pg.draw.polygon(model['pgWindow'], (255, 255, 255), [((23 + 3 + 5+ 10 + 40 + 300 - 10) , (533 + 3 + 5 + 10 + 70 + 60 + 20)), ((23 + 3 + 5+ 10 + 40 + 300 - 20) , (533 + 3 + 5 + 10 + 70 + 60 + 10)), ((23 + 3 + 5+ 10 + 40 + 300 - 20) , (533 + 3 + 5 + 10 + 70 + 60 + 30))])
+    pg.draw.polygon(model['pgWindow'], (255, 255, 255), selectionTrianglePos)
+
+# lambda x : x.getSpeed() would work as well
+def speedCompare(element):
+    return element.getSpeed()
 
 def battleLoop(model, characterList):
     for i in characterList:
         print(i.getName())
     
     run = True
+
+    selectionTrianglePos = 0
+    #more warcrimes
+    selectionTriangleList = [
+    [((23 + 3 + 5+ 10 + 40 - 10) , (533 + 3 + 5 + 10 + 70 + 20)), ((23 + 3 + 5+ 10 + 40 - 20) , (533 + 3 + 5 + 10 + 70 + 10)), ((23 + 3 + 5+ 10 + 40 - 20) , (533 + 3 + 5 + 10 + 70 + 30))],
+    [((23 + 3 + 5+ 10 + 40 + 300 - 10) , (533 + 3 + 5 + 10 + 70 + 20)), ((23 + 3 + 5+ 10 + 40 + 300 - 20) , (533 + 3 + 5 + 10 + 70 + 10)), ((23 + 3 + 5+ 10 + 40 + 300 - 20) , (533 + 3 + 5 + 10 + 70 + 30))],
+    [((23 + 3 + 5+ 10 + 40 - 10) , (533 + 3 + 5 + 10 + 70 + 60 + 20)), ((23 + 3 + 5+ 10 + 40 - 20) , (533 + 3 + 5 + 10 + 70 + 60 + 10)), ((23 + 3 + 5+ 10 + 40 - 20) , (533 + 3 + 5 + 10 + 70 + 60 + 30))],
+    [((23 + 3 + 5+ 10 + 40 + 300 - 10) , (533 + 3 + 5 + 10 + 70 + 60 + 20)), ((23 + 3 + 5+ 10 + 40 + 300 - 20) , (533 + 3 + 5 + 10 + 70 + 60 + 10)), ((23 + 3 + 5+ 10 + 40 + 300 - 20) , (533 + 3 + 5 + 10 + 70 + 60 + 30))]
+    ]
+
+    battleList = sorted(characterList, key=speedCompare, reverse = True)
+    battleList = itertools.cycle(battleList)
+    currentCharacter = next(battleList)
 
     model['pgWindow'].fill(model['windowObject'].returnColor())
     while run:
@@ -178,6 +197,16 @@ def battleLoop(model, characterList):
                 elif event.type == pg.KEYUP:
                     if event.key == pg.K_ESCAPE:
                         run = False
+                    elif event.key == pg.K_RETURN:
+                        currentCharacter = next(battleList)
+                    elif event.key == pg.K_UP and selectionTrianglePos > 1:
+                        selectionTrianglePos -= 2
+                    elif event.key == pg.K_DOWN and selectionTrianglePos < 2:
+                        selectionTrianglePos += 2
+                    elif event.key == pg.K_RIGHT and selectionTrianglePos % 2 == 0:
+                        selectionTrianglePos += 1
+                    elif event.key == pg.K_LEFT and selectionTrianglePos % 2 == 1:
+                        selectionTrianglePos -= 1
                 elif event.type == pg.MOUSEBUTTONUP:
                     if event.button == 1:
                         drawCharacter(model['pgWindow'], model['pepe'], pg.mouse.get_pos())
@@ -186,6 +215,6 @@ def battleLoop(model, characterList):
                         
 
         drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
-        showCurrCharacterMoves(model, characterList)
+        showCurrCharacterMoves(model, currentCharacter, selectionTriangleList[selectionTrianglePos])
         showCharacterStats(model, characterList)
         pg.display.update()
