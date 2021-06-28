@@ -1,0 +1,11 @@
+{
+    "_name": "rogue",
+    "displayName": "Rogue",
+    "attack": 120,
+    "defense": 40,
+    "maxHP": 100,
+    "speed": 100,
+    "imageSrc": "../images/sadPepe.png",
+    "resistances": 0,
+    "color": "#B5B7BB"
+}

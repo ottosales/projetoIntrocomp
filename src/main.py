@@ -2,5 +2,6 @@ import pygame as pg
 import system
 
 model = system.setup()
-system.charSelectionLoop(model)
-#battleLoop()
+characterList = system.charSelectionLoop(model)
+characterList = system.loadCharacterObjects(characterList)
+system.battleLoop(model, characterList)
