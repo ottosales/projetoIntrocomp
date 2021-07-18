@@ -62,3 +62,13 @@ class Player:
 
     def pick(self):
         self.__canBePicked = False
+    
+    def updateLife(self, damage):
+        if damage > 0 and self.__currentHP + damage > self.__maxHP:
+            self.__currentHP = self.__maxHP
+        elif damage < 0 and self.__currentHP + damage <= 0:
+            self.__currentHP = 0
+            return 0 #code understands this as "died"
+        else:
+            self.__currentHP += damage
+            return 1
