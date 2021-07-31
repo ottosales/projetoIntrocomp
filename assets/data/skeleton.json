@@ -5,7 +5,7 @@
     "defense": 50,
     "maxHP": 100,
     "speed": 80,
-    "imageSrc": "../images/redSadPepe.png",
+    "imageSrc": "../images/terrariaSkeleton.png",
     "resistances": 0,
     "color": "#B5B7BB"
 }

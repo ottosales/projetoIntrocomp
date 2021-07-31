@@ -5,7 +5,7 @@
     "defense": 100,
     "maxHP": 200,
     "speed": 30,
-    "imageSrc": "../images/redSadPepe.png",
+    "imageSrc": "../images/terrariaPaladin.png",
     "resistances": 0,
     "color": "#B5B7BB"
 }

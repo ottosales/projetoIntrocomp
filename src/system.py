@@ -1,16 +1,18 @@
 import pygame as pg
+from pygame.constants import K_BACKSLASH, K_BACKSPACE
 import window
 import utils
 import player
 import itertools
-class Teams:
-    pcs = None
-    enemies = None
 
-
-def __init__(self):
-    pcs = []
-    enemies = []
+def loadImageKeepingAR(path, height):
+    image = pg.image.load(path)
+    imgHeight = pg.Surface.get_height(image)
+    imgWidth = pg.Surface.get_width(image)
+    aspectRatio = imgWidth / imgHeight
+    size = (int(aspectRatio * float(height)), height)
+    
+    return pg.transform.scale(image, size)
 
 def loadImage(path, size):
     return pg.transform.scale(pg.image.load(path), size)
@@ -59,20 +61,29 @@ def drawRectangle(pgWindow, pos, margin, width, height):
     pg.draw.rect(pgWindow, (255, 255, 255), outerRect) # color goes here
     pg.draw.rect(pgWindow, (0, 0, 0), innerRect) # color goes here
 
-def drawCharacter(pgWindow, charImage, pos):
-    pgWindow.blit(charImage, pos)
+def drawCharacter(pgWindow, charImage, pos, centerMargin):
+    rect = charImage.get_rect()
+    if centerMargin:
+        rect.center = (pos[0] + 90, pos[1] + 90)
+    else:
+        rect.center = (pos[0], pos[1])
+    pgWindow.blit(charImage, rect)
 
 def setup():
     windowSettings = loadWindow()
     windowObject = window.Window(windowSettings['width'], windowSettings['height'])
-    pepe = loadImage('assets/sprites/sadPepe.png', (128, 128))
-    redPepe = loadImage('assets/sprites/redSadPepe.png', (128, 128))
+    pepe = loadImageKeepingAR('assets/sprites/sadPepe.png', 128)
+    redPepe = loadImageKeepingAR('assets/sprites/redSadPepe.png', 128)
     redPepe = pg.transform.flip(redPepe, True, False)
+    paladin = loadImageKeepingAR('assets/sprites/terrariaPaladin.png', 128)
+    wizard = loadImageKeepingAR('assets/sprites/terrariaWizard.png', 128)
+    rogue = loadImageKeepingAR('assets/sprites/terrariaRogue.png', 128)
+    necromancer = loadImageKeepingAR('assets/sprites/terrariaNecromancer.png', 128)
+    skeleton = loadImageKeepingAR('assets/sprites/terrariaSkeleton.png', 128)
 
     pg.init()
     pgWindow = pg.display.set_mode(windowObject.returnWindowSize())
     pg.display.set_caption('The IntroBattle Project')
-    pg.key.set_repeat(100)
     clock = pg.time.Clock()
     pg.key.set_repeat(200)
 
@@ -82,7 +93,12 @@ def setup():
         'pgWindow': pgWindow,
         'clock': clock,
         'pepe': pepe,
-        'redPepe': redPepe
+        'redPepe': redPepe,
+        'paladin': paladin,
+        'wizard' : wizard,
+        'rogue' : rogue,
+        'necromancer': necromancer,
+        'skeleton': skeleton
     }
 
     return model
@@ -128,8 +144,11 @@ def charSelectionLoop(model):
                 drawRectangle(model['pgWindow'], allCharacterSquares[i], 5, 180, 180)
                 write(model, charList[i].capitalize(), (255, 255, 255), allCharacterSquares[i][0] + 90, allCharacterSquares[i][1] + 210, 35)
 
-            drawCharacter(model['pgWindow'], model['pepe'], (allCharacterSquares[i][0] + 30, allCharacterSquares[i][1] + 30)) # magic numbers for now
-        
+            if charList[i] in model:
+                drawCharacter(model['pgWindow'], model[charList[i]], (allCharacterSquares[i][0], allCharacterSquares[i][1]), True)
+            else:
+                drawCharacter(model['pgWindow'], model['pepe'], (allCharacterSquares[i][0], allCharacterSquares[i][1]), True)
+            
         pg.display.update()
 
 def loadCharacterObjects(characterList):
@@ -165,10 +184,16 @@ def showCharacterStats(model, characterList):
         writeLeftAlign(model, hpStr , (255, 255, 255), 780 , y, 30)
         y += 70
 
-# def targetSelection(): 
-# 730, 40
-# 930, 120
-# 730, 200
+def showCharactersInBattle(model, players, enemies):
+    playerPositions = [(230, 120), (100, 280), (230, 430)]
+    enemyPositions = [(830, 200), (760, 400)]
+
+    for i in range(0, len(players)):
+        drawCharacter(model['pgWindow'], model[players[i].getName().lower()], playerPositions[i], False)
+
+    for i in range(0, len(enemies)):
+        drawCharacter(model['pgWindow'], model[enemies[i].getName().lower()], enemyPositions[i], False)
+
 
 def calcDamageBasicAttack(attacker, defender):
     # damage = attack - defence, plain and simple
@@ -179,6 +204,47 @@ def calcDamageBasicAttack(attacker, defender):
         damage = 5
 
     defender.updateLife(-1 * damage)
+
+def attack(model, currentCharacter, characterList, enemyList):
+    trianglePositions = [
+        ((830, 120), (820, 110), (840, 110)),
+        ((760, 320), (750, 310), (770, 310))
+    ]
+    enemySelection = 0
+
+    run = True
+
+    while run:
+        model['pgWindow'].fill(model['windowObject'].returnColor())
+        drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
+        showTurn(model, currentCharacter)
+        showCharactersInBattle(model, characterList, enemyList)
+
+        for event in pg.event.get():
+                    if event.type == pg.QUIT:
+                        run = False
+                    elif event.type == pg.KEYUP:
+                        if event.key == pg.K_ESCAPE:
+                            run = False
+                        elif event.key == pg.K_RETURN:
+                            if enemySelection == 0:
+                                calcDamageBasicAttack(currentCharacter, enemyList[0])
+                                return 1
+                            else:
+                                calcDamageBasicAttack(currentCharacter, enemyList[1])
+                                return 1
+                            
+                        elif (event.key == pg.K_UP and enemySelection == 1) or (event.key == pg.K_RIGHT and enemySelection == 1):
+                            enemySelection = 0
+                        elif (event.key == pg.K_DOWN and enemySelection == 0) or (event.key == pg.K_LEFT and enemySelection == 0):
+                            enemySelection = 1
+                        elif event.key == pg.K_BACKSPACE:
+                            return 0
+
+        pg.draw.polygon(model['pgWindow'], (230, 230, 230), trianglePositions[enemySelection])
+        pg.display.update()
+
+    return -1
 
 def showTurn(model, currentCharacter):
     drawRectangle(model['pgWindow'], (23, 533), 3, 600 - (23 + 5), 211)
@@ -217,17 +283,20 @@ def battleLoop(model, characterList, enemyList):
 
     model['pgWindow'].fill(model['windowObject'].returnColor())
     while run:
+        drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
+        showTurn(model, currentCharacter)
+        showCharactersInBattle(model, characterList, enemyList)
+        
+        print(enemyList[1].getName())
+        print(enemyList[1].getCurrentHP())
+
         if currentCharacter in enemyList:
-            drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
-            showTurn(model, currentCharacter)
             showCharacterStats(model, characterList)
-            calcDamageBasicAttack(currentCharacter, characterList[0])
+            # calcDamageBasicAttack(currentCharacter, characterList[0])
             pg.display.update()
-            pg.time.wait(4000)
+            pg.time.wait(2800)
             currentCharacter = next(battleList)
         else:
-            drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
-            showTurn(model, currentCharacter)
             showCurrCharacterMoves(model, selectionTriangleList[selectionTrianglePos])
             for event in pg.event.get():
                     if event.type == pg.QUIT:
@@ -237,8 +306,11 @@ def battleLoop(model, characterList, enemyList):
                             run = False
                         elif event.key == pg.K_RETURN:
                             if selectionTrianglePos == 0:
-                                # targetSelection(model)
-                                currentCharacter = next(battleList)
+                                attkResult = attack(model, currentCharacter, characterList, enemyList)
+                                if attkResult == -1:
+                                    run = False
+                                elif attkResult == 1:
+                                    currentCharacter = next(battleList)
                         elif event.key == pg.K_UP and selectionTrianglePos > 1:
                             selectionTrianglePos -= 2
                         elif event.key == pg.K_DOWN and selectionTrianglePos < 2:

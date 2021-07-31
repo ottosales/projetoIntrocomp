@@ -5,7 +5,7 @@
     "defense": 80,
     "maxHP": 300,
     "speed": 20,
-    "imageSrc": "../images/redSadPepe.png",
+    "imageSrc": "../images/terrariaNecromancer.png",
     "resistances": 0,
     "color": "#B5B7BB"
 }

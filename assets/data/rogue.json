@@ -5,7 +5,7 @@
     "defense": 40,
     "maxHP": 100,
     "speed": 100,
-    "imageSrc": "../images/sadPepe.png",
+    "imageSrc": "../images/terrariaRogue.png",
     "resistances": 0,
     "color": "#B5B7BB"
 }
