@@ -1,7 +1,7 @@
 {
     "_name": "rogue",
     "displayName": "Rogue",
-    "attack": 120,
+    "attack": 100,
     "defense": 40,
     "maxHP": 100,
     "speed": 100,

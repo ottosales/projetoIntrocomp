@@ -1,7 +1,7 @@
 {
     "_name": "paladin",
     "displayName": "Paladin",
-    "attack": 60,
+    "attack": 50,
     "defense": 100,
     "maxHP": 200,
     "speed": 30,

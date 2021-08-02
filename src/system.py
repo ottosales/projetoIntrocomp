@@ -217,7 +217,9 @@ def attack(model, currentCharacter, characterList, enemyList):
     while run:
         model['pgWindow'].fill(model['windowObject'].returnColor())
         drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
+        showCharacterStats(model, characterList)
         showTurn(model, currentCharacter)
+        showAttackMessage(model, currentCharacter, characterList)
         showCharactersInBattle(model, characterList, enemyList)
 
         for event in pg.event.get():
@@ -236,7 +238,7 @@ def attack(model, currentCharacter, characterList, enemyList):
                             
                         elif (event.key == pg.K_UP and enemySelection == 1) or (event.key == pg.K_RIGHT and enemySelection == 1):
                             enemySelection = 0
-                        elif (event.key == pg.K_DOWN and enemySelection == 0) or (event.key == pg.K_LEFT and enemySelection == 0):
+                        elif ((event.key == pg.K_DOWN and enemySelection == 0) or (event.key == pg.K_LEFT and enemySelection == 0)) and len(enemyList) != 1:
                             enemySelection = 1
                         elif event.key == pg.K_BACKSPACE:
                             return 0
@@ -250,6 +252,12 @@ def showTurn(model, currentCharacter):
     drawRectangle(model['pgWindow'], (23, 533), 3, 600 - (23 + 5), 211)
     writeLeftAlign(model, currentCharacter.getName() + '\'s turn!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10), 30)
 
+def showAttackMessage(model, currentCharacter, characterList):
+    if currentCharacter in characterList:
+        writeLeftAlign(model, 'Select your target!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70), 30)
+    else:
+        writeLeftAlign(model, 'It will attack soon...', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70), 30)
+
 # please god forgive me for these warcrimes
 def showCurrCharacterMoves(model, selectionTrianglePos):
     writeLeftAlign(model, 'Attack', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70), 30)
@@ -262,10 +270,23 @@ def showCurrCharacterMoves(model, selectionTrianglePos):
 def speedCompare(element):
     return element.getSpeed()
 
+def deathCheck(list):
+    for element in list:
+        if element.getCurrentHP() == 0:
+            return element
+
+    return False
+
+def nextIndex(index, list):
+    listLength = len(list)
+    if index + 1 >= listLength:
+        index = 0
+    else:
+        index += 1
+
+    return index
+
 def battleLoop(model, characterList, enemyList):
-    for i in characterList:
-        print(i.getName())
-    
     run = True
 
     selectionTrianglePos = 0
@@ -278,24 +299,32 @@ def battleLoop(model, characterList, enemyList):
     ]
 
     battleList = sorted(characterList + enemyList, key=speedCompare, reverse = True)
-    battleList = itertools.cycle(battleList)
-    currentCharacter = next(battleList)
+    currentIndex = 0
+    currentCharacter = battleList[currentIndex]
 
     model['pgWindow'].fill(model['windowObject'].returnColor())
     while run:
+        model['pgWindow'].fill(model['windowObject'].returnColor())
         drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
         showTurn(model, currentCharacter)
         showCharactersInBattle(model, characterList, enemyList)
-        
-        print(enemyList[1].getName())
-        print(enemyList[1].getCurrentHP())
 
         if currentCharacter in enemyList:
             showCharacterStats(model, characterList)
-            # calcDamageBasicAttack(currentCharacter, characterList[0])
+            showAttackMessage(model, currentCharacter, characterList)
+            calcDamageBasicAttack(currentCharacter, characterList[0])
             pg.display.update()
-            pg.time.wait(2800)
-            currentCharacter = next(battleList)
+            pg.time.wait(3000)
+            pg.event.clear()
+            deathCheckReturn = deathCheck(battleList)
+            if deathCheckReturn:
+                battleList.remove(deathCheckReturn)
+                if deathCheckReturn in characterList:
+                    characterList.remove(deathCheckReturn)
+                else:
+                    enemyList.remove(deathCheckReturn)
+            currentIndex = nextIndex(currentIndex, battleList)
+            currentCharacter = battleList[currentIndex]
         else:
             showCurrCharacterMoves(model, selectionTriangleList[selectionTrianglePos])
             for event in pg.event.get():
@@ -310,7 +339,15 @@ def battleLoop(model, characterList, enemyList):
                                 if attkResult == -1:
                                     run = False
                                 elif attkResult == 1:
-                                    currentCharacter = next(battleList)
+                                    deathCheckReturn = deathCheck(battleList)
+                                    if deathCheckReturn:
+                                        battleList.remove(deathCheckReturn)
+                                        if deathCheckReturn in characterList:
+                                            characterList.remove(deathCheckReturn)
+                                        else:
+                                            enemyList.remove(deathCheckReturn)
+                                    currentIndex = nextIndex(currentIndex, battleList)
+                                    currentCharacter = battleList[currentIndex]
                         elif event.key == pg.K_UP and selectionTrianglePos > 1:
                             selectionTrianglePos -= 2
                         elif event.key == pg.K_DOWN and selectionTrianglePos < 2:
@@ -319,10 +356,22 @@ def battleLoop(model, characterList, enemyList):
                             selectionTrianglePos += 1
                         elif event.key == pg.K_LEFT and selectionTrianglePos % 2 == 1:
                             selectionTrianglePos -= 1
-                    elif event.type == pg.MOUSEBUTTONUP:
-                        if event.button == 1:
-                           print(pg.mouse.get_pos())
 
             showCharacterStats(model, characterList)
+
+            if len(enemyList) == 0 or len(characterList) == 0:
+                run = False
+
             pg.display.update()
-            
+
+    model['pgWindow'].fill(model['windowObject'].returnColor())
+    showCharactersInBattle(model, characterList, enemyList)
+
+    if len(enemyList) == 0:
+        write(model, "You won the battle! :)", (230, 230, 230), False, 668, 35)
+
+    else:
+        write(model, "You lost the battle! :(", (210, 210, 210), False, 668, 35)
+
+    pg.display.update()
+    pg.time.wait(3000)
