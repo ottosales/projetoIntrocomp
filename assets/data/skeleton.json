@@ -1,0 +1,11 @@
+{
+    "_name": "skeleton",
+    "displayName": "Skeleton",
+    "attack": 100,
+    "defense": 50,
+    "maxHP": 100,
+    "speed": 80,
+    "imageSrc": "../images/terrariaSkeleton.png",
+    "resistances": 0,
+    "color": "#B5B7BB"
+}
