@@ -11,6 +11,7 @@ class Player:
     __position = None
     __resistances = None
     __mainColor = None
+    __isDefending = False
 
     def __init__(self, name, attack, defense, maxHP, speed, attackList, imageSrc, position, resistances, color):
         self.__name = name
@@ -72,3 +73,16 @@ class Player:
         else:
             self.__currentHP += damage
             return 1
+
+    def isDefending(self):
+        return self.__isDefending
+
+    def defend(self):
+        if not self.isDefending():
+            self.__defense *= 2
+            self.__isDefending = True
+        
+    def stopDefending(self):
+        if self.isDefending():
+            self.__defense = int(self.__defense * 0.5)
+            self.__isDefending = False

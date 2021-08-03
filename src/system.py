@@ -3,7 +3,7 @@ from pygame.constants import K_BACKSLASH, K_BACKSPACE
 import window
 import utils
 import player
-import itertools
+import random
 
 def loadImageKeepingAR(path, height):
     image = pg.image.load(path)
@@ -252,6 +252,10 @@ def showTurn(model, currentCharacter):
     drawRectangle(model['pgWindow'], (23, 533), 3, 600 - (23 + 5), 211)
     writeLeftAlign(model, currentCharacter.getName() + '\'s turn!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10), 30)
 
+def showDefeated(model, name):
+    drawRectangle(model['pgWindow'], (23, 533), 3, 600 - (23 + 5), 211)
+    writeLeftAlign(model, name + ' was defeated!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10), 30)
+
 def showAttackMessage(model, currentCharacter, characterList):
     if currentCharacter in characterList:
         writeLeftAlign(model, 'Select your target!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70), 30)
@@ -287,6 +291,7 @@ def nextIndex(index, list):
     return index
 
 def battleLoop(model, characterList, enemyList):
+    random.seed()
     run = True
 
     selectionTrianglePos = 0
@@ -302,7 +307,6 @@ def battleLoop(model, characterList, enemyList):
     currentIndex = 0
     currentCharacter = battleList[currentIndex]
 
-    model['pgWindow'].fill(model['windowObject'].returnColor())
     while run:
         model['pgWindow'].fill(model['windowObject'].returnColor())
         drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
@@ -312,13 +316,17 @@ def battleLoop(model, characterList, enemyList):
         if currentCharacter in enemyList:
             showCharacterStats(model, characterList)
             showAttackMessage(model, currentCharacter, characterList)
-            calcDamageBasicAttack(currentCharacter, characterList[0])
+            target = random.randrange(0, len(characterList))
+            calcDamageBasicAttack(currentCharacter, characterList[target])
             pg.display.update()
             pg.time.wait(3000)
             pg.event.clear()
             deathCheckReturn = deathCheck(battleList)
             if deathCheckReturn:
                 battleList.remove(deathCheckReturn)
+                showDefeated(model, deathCheckReturn.getName())
+                pg.display.update()
+                pg.time.wait(1800)
                 if deathCheckReturn in characterList:
                     characterList.remove(deathCheckReturn)
                 else:
@@ -326,6 +334,8 @@ def battleLoop(model, characterList, enemyList):
             currentIndex = nextIndex(currentIndex, battleList)
             currentCharacter = battleList[currentIndex]
         else:
+            if currentCharacter.isDefending():
+                currentCharacter.stopDefending()
             showCurrCharacterMoves(model, selectionTriangleList[selectionTrianglePos])
             for event in pg.event.get():
                     if event.type == pg.QUIT:
@@ -342,12 +352,19 @@ def battleLoop(model, characterList, enemyList):
                                     deathCheckReturn = deathCheck(battleList)
                                     if deathCheckReturn:
                                         battleList.remove(deathCheckReturn)
+                                        showDefeated(model, deathCheckReturn.getName())
+                                        pg.display.update()
+                                        pg.time.wait(1800)
                                         if deathCheckReturn in characterList:
                                             characterList.remove(deathCheckReturn)
                                         else:
                                             enemyList.remove(deathCheckReturn)
                                     currentIndex = nextIndex(currentIndex, battleList)
                                     currentCharacter = battleList[currentIndex]
+                            elif selectionTrianglePos == 1:
+                                currentCharacter.defend()
+                                currentIndex = nextIndex(currentIndex, battleList)
+                                currentCharacter = battleList[currentIndex]
                         elif event.key == pg.K_UP and selectionTrianglePos > 1:
                             selectionTrianglePos -= 2
                         elif event.key == pg.K_DOWN and selectionTrianglePos < 2:
@@ -366,12 +383,12 @@ def battleLoop(model, characterList, enemyList):
 
     model['pgWindow'].fill(model['windowObject'].returnColor())
     showCharactersInBattle(model, characterList, enemyList)
-
+    drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
     if len(enemyList) == 0:
-        write(model, "You won the battle! :)", (230, 230, 230), False, 668, 35)
+        write(model, "You won the battle! :)", (230, 230, 230), False, 638, 35)
 
     else:
-        write(model, "You lost the battle! :(", (210, 210, 210), False, 668, 35)
+        write(model, "You lost the battle! :(", (210, 210, 210), False, 638, 35)
 
     pg.display.update()
     pg.time.wait(3000)
