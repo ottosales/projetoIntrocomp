@@ -1,0 +1,11 @@
+{
+    "_name": "priest",
+    "displayName": "Priest",
+    "attack": 50,
+    "defense": 100,
+    "maxHP": 200,
+    "speed": 30,
+    "imageSrc": "../images/priest.png",
+    "resistances": 0,
+    "color": "#B5B7BB"
+}
