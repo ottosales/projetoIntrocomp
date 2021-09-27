@@ -43,11 +43,15 @@ def writeLeftAlign(model, string, color, xPos, yPos, size):
     # todo: move this next line of code to the utils lib
     # possibly, creating a function where we can send the size of the text we want and receive a dict
     # so we can use it like: size40Text['robotoMedium'] or size25Text['joystix']
-    text = pg.font.Font('assets/fonts/RobotoMono-Medium.ttf', size)
+    text = pg.font.Font('assets/fonts/joystix monospace.ttf', size)
     textSurf, textRect = text_objects(string, text, color)
     textRect.x = xPos
     textRect.y = yPos
 
+    textSurf2, textRect2 = text_objects(string, text, (0, 0, 0))
+    textRect2.x = xPos + 2
+    textRect2.y = yPos + 2
+    model['pgWindow'].blit(textSurf2, textRect2)
     model['pgWindow'].blit(textSurf, textRect)
 
 def text_objects(text, font, color):
@@ -83,8 +87,13 @@ def setup():
     skeleton = pg.transform.flip(loadImageKeepingAR('assets/sprites/skelly.png', 128), True, False)
     hunter = loadImageKeepingAR('assets/sprites/hunter.png', 128)
     priest = loadImageKeepingAR('assets/sprites/priest.png', 128)
-    menu = loadImage('assets/sprites/menu.png', (180, 180))
     arrow = loadImageKeepingAR('assets/sprites/arrow.png', 26)
+    sideArrow = pg.transform.rotate(loadImageKeepingAR('assets/sprites/arrow.png', 26), 90)
+    menu = loadImage('assets/sprites/menu.png', (180, 180))
+    menuLeft = loadImage('assets/sprites/menuLeft.png', (580, 220))
+    pg.Surface.set_alpha(menuLeft, 210)
+    menuRight = loadImage('assets/sprites/menuRight.png', (400, 220))
+    pg.Surface.set_alpha(menuRight, 210)
 
     pg.init()
     pgWindow = pg.display.set_mode(windowObject.returnWindowSize())
@@ -108,7 +117,10 @@ def setup():
         'hunter': hunter,
         'priest': priest,
         'menu': menu,
-        'arrow': arrow
+        'arrow': arrow,
+        'sideArrow': sideArrow,
+        'menuLeft': menuLeft,
+        'menuRight': menuRight
     }
 
     return model
@@ -184,10 +196,11 @@ def pickEnemyEncounter():
     return returnList
 
 def showCharacterStats(model, characterList):
-    drawRectangle(model['pgWindow'], (600, 533), 3, 399, 211)
-    y = (533 + 2 + 5 + 10)
+    # drawRectangle(model['pgWindow'], (600, 533), 3, 399, 211)
+    model['pgWindow'].blit(model['menuRight'], (600, 533))
+    y = (553 + 2 + 5 + 10)
     for char in characterList:
-        writeLeftAlign(model, char.getName(), (255, 255, 255), (600 + 3 + 20) , y, 30)
+        writeLeftAlign(model, char.getName(), (255, 255, 255), (600 + 3 + 20) , y, 25)
         maxHPStr = str(char.getMaxHP())
         currHPStr = str(char.getCurrentHP())
         if char.getMaxHP() < 100:
@@ -195,12 +208,12 @@ def showCharacterStats(model, characterList):
         if char.getCurrentHP() < 100:
             currHPStr = ' ' + str(char.getCurrentHP())
         hpStr = currHPStr + ' / ' + maxHPStr
-        writeLeftAlign(model, hpStr , (255, 255, 255), 780 , y, 30)
-        y += 70
+        writeLeftAlign(model, hpStr , (255, 255, 255), 780 , y, 25)
+        y += 60
 
 def showCharactersInBattle(model, players, enemies):
-    playerPositions = [(230, 120), (100, 280), (230, 430)]
-    enemyPositions = [(830, 200), (760, 400)]
+    playerPositions = [(230, 240), (100, 340), (230, 440)]
+    enemyPositions = [(830, 230), (760, 400)]
 
     for i in range(0, len(players)):
         drawCharacter(model['pgWindow'], model[players[i].getName().lower()], playerPositions[i], False)
@@ -231,7 +244,7 @@ def attack(model, currentCharacter, characterList, enemyList):
     while run:
         # model['pgWindow'].fill(model['windowObject'].returnColor())
         model['pgWindow'].blit(model['background'], (0, 0))
-        drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
+        # drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
         showCharacterStats(model, characterList)
         showTurn(model, currentCharacter)
         showAttackMessage(model, currentCharacter, characterList)
@@ -264,25 +277,27 @@ def attack(model, currentCharacter, characterList, enemyList):
     return -1
 
 def showTurn(model, currentCharacter):
-    drawRectangle(model['pgWindow'], (23, 533), 3, 600 - (23 + 5), 211)
-    writeLeftAlign(model, currentCharacter.getName() + '\'s turn!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10), 30)
+    # drawRectangle(model['pgWindow'], (23, 533), 3, 600 - (23 + 5), 211)
+    model['pgWindow'].blit(model['menuLeft'], (15, 533))
+    writeLeftAlign(model, currentCharacter.getName() + '\'s turn!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (553 + 3 + 5 + 10), 25)
 
 def showDefeated(model, name):
-    drawRectangle(model['pgWindow'], (23, 533), 3, 600 - (23 + 5), 211)
-    writeLeftAlign(model, name + ' was defeated!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10), 30)
+    # drawRectangle(model['pgWindow'], (23, 533), 3, 600 - (23 + 5), 211)
+    model['pgWindow'].blit(model['menuLeft'], (15, 533))
+    writeLeftAlign(model, name + ' was defeated!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10), 25)
 
 def showAttackMessage(model, currentCharacter, characterList):
     if currentCharacter in characterList:
-        writeLeftAlign(model, 'Select your target!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70), 30)
+        writeLeftAlign(model, 'Select your target!', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70), 25)
     else:
-        writeLeftAlign(model, 'It will attack soon...', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70), 30)
+        writeLeftAlign(model, 'It will attack soon...', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70), 25)
 
 # please god forgive me for these warcrimes
 def showCurrCharacterMoves(model, selectionTrianglePos):
-    writeLeftAlign(model, 'Attack', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70), 30)
-    writeLeftAlign(model, 'Insight', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70 + 60), 30)
-    writeLeftAlign(model, 'Defend', (255, 255, 255), (23 + 3 + 5+ 10 + 40 + 300) , (533 + 3 + 5 + 10 + 70), 30)
-    writeLeftAlign(model, 'Skill', (255, 255, 255), (23 + 3 + 5+ 10 + 40 + 300) , (533 + 3 + 5 + 10 + 70 + 60), 30)
+    writeLeftAlign(model, 'Attack', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70), 25)
+    writeLeftAlign(model, 'Insight', (255, 255, 255), (23 + 3 + 5+ 10 + 40) , (533 + 3 + 5 + 10 + 70 + 60), 25)
+    writeLeftAlign(model, 'Defend', (255, 255, 255), (23 + 3 + 5+ 10 + 40 + 300) , (533 + 3 + 5 + 10 + 70), 25)
+    writeLeftAlign(model, 'Skill', (255, 255, 255), (23 + 3 + 5+ 10 + 40 + 300) , (533 + 3 + 5 + 10 + 70 + 60), 25)
     pg.draw.polygon(model['pgWindow'], (255, 255, 255), selectionTrianglePos)
 
 # lambda x : x.getSpeed() would work as well
@@ -325,7 +340,7 @@ def battleLoop(model, characterList, enemyList):
     while run:
         # model['pgWindow'].fill(model['windowObject'].returnColor())
         model['pgWindow'].blit(model['background'], (0, 0))
-        drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
+        # drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
         showTurn(model, currentCharacter)
         showCharactersInBattle(model, characterList, enemyList)
 
