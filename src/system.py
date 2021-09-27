@@ -36,7 +36,7 @@ def write(model, string, color, xPos, yPos, size):
         textRect.center = ((model['windowObject'].returnWindowSize()[0]/2), (yPos))
     else:
         textRect.center = (xPos, yPos)
-
+    print(textRect, string)
     model['pgWindow'].blit(textSurf, textRect)
 
 def writeLeftAlign(model, string, color, xPos, yPos, size):
@@ -72,14 +72,19 @@ def drawCharacter(pgWindow, charImage, pos, centerMargin):
 def setup():
     windowSettings = loadWindow()
     windowObject = window.Window(windowSettings['width'], windowSettings['height'])
+    background = loadImage('assets/sprites/bgLarge.png', (1024, 768))
     pepe = loadImageKeepingAR('assets/sprites/sadPepe.png', 128)
     redPepe = loadImageKeepingAR('assets/sprites/redSadPepe.png', 128)
     redPepe = pg.transform.flip(redPepe, True, False)
-    paladin = loadImageKeepingAR('assets/sprites/terrariaPaladin.png', 128)
-    wizard = loadImageKeepingAR('assets/sprites/terrariaWizard.png', 128)
-    rogue = loadImageKeepingAR('assets/sprites/terrariaRogue.png', 128)
-    necromancer = loadImageKeepingAR('assets/sprites/terrariaNecromancer.png', 128)
-    skeleton = loadImageKeepingAR('assets/sprites/terrariaSkeleton.png', 128)
+    paladin = loadImageKeepingAR('assets/sprites/paladin.png', 128)
+    wizard = pg.transform.flip(loadImageKeepingAR('assets/sprites/wizard.png', 128), True, False)
+    rogue = loadImageKeepingAR('assets/sprites/rogue.png', 128)
+    necromancer = pg.transform.flip(loadImageKeepingAR('assets/sprites/necro.png', 128), True, False)
+    skeleton = pg.transform.flip(loadImageKeepingAR('assets/sprites/skelly.png', 128), True, False)
+    hunter = loadImageKeepingAR('assets/sprites/hunter.png', 128)
+    priest = loadImageKeepingAR('assets/sprites/priest.png', 128)
+    menu = loadImage('assets/sprites/menu.png', (180, 180))
+    arrow = loadImageKeepingAR('assets/sprites/arrow.png', 26)
 
     pg.init()
     pgWindow = pg.display.set_mode(windowObject.returnWindowSize())
@@ -92,13 +97,18 @@ def setup():
         'windowObject': windowObject,
         'pgWindow': pgWindow,
         'clock': clock,
+        'background': background,
         'pepe': pepe,
         'redPepe': redPepe,
         'paladin': paladin,
         'wizard' : wizard,
         'rogue' : rogue,
         'necromancer': necromancer,
-        'skeleton': skeleton
+        'skeleton': skeleton,
+        'hunter': hunter,
+        'priest': priest,
+        'menu': menu,
+        'arrow': arrow
     }
 
     return model
@@ -110,7 +120,7 @@ def charSelectionLoop(model):
     run = True
     selectedSquare = 0
     # todo: make this a JSON file
-    allCharacterSquares = [(132, 200), (422, 200), (712, 200), (132, 490), (422, 490), (712, 490)]
+    allCharacterSquares = [(132, 220), (422, 220), (712, 220), (277, 510), (567, 510)]
 
     while run:
         model['clock'].tick(60)
@@ -124,7 +134,7 @@ def charSelectionLoop(model):
                     run = False
                 elif event.key == pg.K_UP and selectedSquare > 2:
                     selectedSquare -= 3
-                elif event.key == pg.K_DOWN and selectedSquare < 3:
+                elif event.key == pg.K_DOWN and selectedSquare < 2:
                     selectedSquare += 3
                 elif event.key == pg.K_RIGHT and (selectedSquare != 2 and selectedSquare != 5):
                     selectedSquare += 1
@@ -133,15 +143,19 @@ def charSelectionLoop(model):
                 elif event.key == pg.K_RETURN:
                     characterJsonList.append(loadCharacter(charList[selectedSquare]))
                 
-        model['pgWindow'].fill(model['windowObject'].returnColor())
+        # model['pgWindow'].fill(model['windowObject'].returnColor())
+        model['pgWindow'].blit(model['background'], (0, 0))
+        drawRectangle(model['pgWindow'], (320, 40), 5, 384, 80)
         write(model, 'IntroBattle!', (255, 255, 255), None, 80, 45)
 
-        for i in range(0, len(allCharacterSquares)):
+        for i in range(0, len(charList)):
             if i == selectedSquare:
-                drawRectangle(model['pgWindow'], allCharacterSquares[i], 9, 180, 180)
+                # drawRectangle(model['pgWindow'], allCharacterSquares[i], 9, 180, 180)
+                model['pgWindow'].blit(model['menu'], allCharacterSquares[i])
                 write(model, charList[i].capitalize(), (255, 255, 255), allCharacterSquares[i][0] + 90, allCharacterSquares[i][1] + 210, 38)
             else:
-                drawRectangle(model['pgWindow'], allCharacterSquares[i], 5, 180, 180)
+                # drawRectangle(model['pgWindow'], allCharacterSquares[i], 5, 180, 180)
+                model['pgWindow'].blit(model['menu'], allCharacterSquares[i])
                 write(model, charList[i].capitalize(), (255, 255, 255), allCharacterSquares[i][0] + 90, allCharacterSquares[i][1] + 210, 35)
 
             if charList[i] in model:
@@ -215,7 +229,8 @@ def attack(model, currentCharacter, characterList, enemyList):
     run = True
 
     while run:
-        model['pgWindow'].fill(model['windowObject'].returnColor())
+        # model['pgWindow'].fill(model['windowObject'].returnColor())
+        model['pgWindow'].blit(model['background'], (0, 0))
         drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
         showCharacterStats(model, characterList)
         showTurn(model, currentCharacter)
@@ -308,7 +323,8 @@ def battleLoop(model, characterList, enemyList):
     currentCharacter = battleList[currentIndex]
 
     while run:
-        model['pgWindow'].fill(model['windowObject'].returnColor())
+        # model['pgWindow'].fill(model['windowObject'].returnColor())
+        model['pgWindow'].blit(model['background'], (0, 0))
         drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
         showTurn(model, currentCharacter)
         showCharactersInBattle(model, characterList, enemyList)
