@@ -5,7 +5,7 @@
     "defense": 80,
     "maxHP": 300,
     "speed": 20,
-    "imageSrc": "../images/terrariaNecromancer.png",
+    "imageSrc": "../images/necro.png",
     "resistances": 0,
     "color": "#B5B7BB"
 }
