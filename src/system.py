@@ -36,7 +36,6 @@ def write(model, string, color, xPos, yPos, size):
         textRect.center = ((model['windowObject'].returnWindowSize()[0]/2), (yPos))
     else:
         textRect.center = (xPos, yPos)
-    print(textRect, string)
     model['pgWindow'].blit(textSurf, textRect)
 
 def writeLeftAlign(model, string, color, xPos, yPos, size):
@@ -428,7 +427,6 @@ def battleLoop(model, characterList, enemyList):
     # drawRectangle(model['pgWindow'], (12, 520), 6, 1000, 236)
     if len(enemyList) == 0:
         writeLeftAlign(model, "You won the battle! :)", (255, 255, 255), 275, 580, 25)
-
     else:
         writeLeftAlign(model, "You lost the battle! :(", (255, 255, 255), 275, 580, 25)
 

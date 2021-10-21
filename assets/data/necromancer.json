@@ -3,7 +3,7 @@
     "displayName": "Necromancer",
     "attack": 40,
     "defense": 80,
-    "maxHP": 300,
+    "maxHP": 250,
     "speed": 20,
     "imageSrc": "../images/necro.png",
     "resistances": 0,
